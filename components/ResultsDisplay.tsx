@@ -158,7 +158,7 @@ export default function ResultsDisplay({
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-                INDI 4.0 Questionnaire Results
+                INDI 4.0 Form Results
               </h1>
               <p className="text-sm text-gray-500 mt-2">
                 {new Date(results.timestamp).toLocaleDateString("id-ID", {

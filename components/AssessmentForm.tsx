@@ -141,18 +141,18 @@ export default function AssessmentForm({ onSubmit }: AssessmentFormProps) {
               Indonesia Industry 4.0 Readiness Index
             </p>
             <div className="mt-4">
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-md font-medium">
                 <span>
                   Pertanyaan {currentQuestion + 1} dari {totalQuestions}
                 </span>
-                <span>{progress.toFixed(0)}%</span>
+                {/* <span>{progress.toFixed(0)}%</span> */}
               </div>
-              <div className="w-full bg-blue-400 bg-opacity-30 rounded-full h-2">
+              {/* <div className="w-full bg-blue-400 bg-opacity-30 rounded-full h-2">
                 <div
                   className="bg-white h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
 
