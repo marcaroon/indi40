@@ -13,7 +13,7 @@ import type {
  */
 export function calculateQuestionScore(
   question: Question,
-  response: string | string[] | undefined
+  response: string | string[] | undefined,
 ): number {
   if (!response || response === "") return 0;
 
@@ -26,7 +26,7 @@ export function calculateQuestionScore(
 
     // Filter out exclusive options (A, E, F - typically "Tidak ada", "Belum ada")
     const validSelections = response.filter(
-      (value) => !["A", "E", "F"].includes(value)
+      (value) => !["A", "E", "F"].includes(value),
     );
 
     // If "Tidak ada" or similar is selected, score is 0
@@ -56,7 +56,7 @@ export function calculateQuestionScore(
  */
 export function calculatePillarScore(
   responses: AssessmentResponse,
-  questions: Question[]
+  questions: Question[],
 ): number {
   let totalScore = 0;
   let questionCount = 0;
@@ -105,7 +105,7 @@ export function getLevelDescription(level: number): string {
  */
 export function getLevelInterpretation(
   level: number,
-  pillarName?: string
+  pillarName?: string,
 ): string {
   const interpretations: Record<number, string> = {
     0: pillarName
@@ -132,7 +132,7 @@ export function getLevelInterpretation(
  */
 export function getPillarInterpretation(
   pillarId: string,
-  level: number
+  level: number,
 ): string {
   const interpretations: Record<string, Record<number, string>> = {
     management: {
@@ -185,7 +185,7 @@ export function calculateAssessmentResults(
     title: string;
     weight: number;
     questions: Question[];
-  }>
+  }>,
 ): AssessmentResults {
   const pillarScores: Record<string, number> = {};
   const pillarDetails: Record<string, PillarDetail> = {};
@@ -217,6 +217,15 @@ export function calculateAssessmentResults(
   const totalScore = weightedSum;
   const overallLevel = getLevel(totalScore);
 
+  const getOptionLabel = (questionId: string, value: string): string => {
+    const section = sections.find((s) =>
+      s.questions.some((q) => q.id === questionId),
+    );
+    const question = section?.questions.find((q) => q.id === questionId);
+    const option = question?.options?.find((opt) => opt.value === value);
+    return option?.label || value;
+  };
+
   return {
     pillarScores,
     pillarDetails,
@@ -225,8 +234,8 @@ export function calculateAssessmentResults(
     timestamp: new Date().toISOString(),
     companyInfo: {
       name: (responses["1.1"] as string) || "N/A",
-      sector: (responses["1.3"] as string) || "N/A",
-      employees: (responses["1.4"] as string) || "N/A",
+      sector: getOptionLabel("1.3", responses["1.3"] as string) || "N/A", // ← LABEL
+      employees: getOptionLabel("1.4", responses["1.4"] as string) || "N/A", // ← LABEL
     },
   };
 }
@@ -236,7 +245,7 @@ export function calculateAssessmentResults(
  */
 export function validateResponses(
   responses: AssessmentResponse,
-  questions: Question[]
+  questions: Question[],
 ): { isValid: boolean; missingFields: string[] } {
   const missingFields: string[] = [];
 

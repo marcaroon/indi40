@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!responses || Object.keys(responses).length === 0) {
       return NextResponse.json(
         { success: false, error: "No responses provided" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,19 +27,30 @@ export async function POST(request: NextRequest) {
     // Save to database using transaction
     const assessmentId = await transaction(async (connection) => {
       // 1. Insert main assessment record
+      // Helper function untuk mendapatkan label dari value
+      const getOptionLabel = (questionId: string, value: string): string => {
+        const question = sections
+          .flatMap((s) => s.questions)
+          .find((q) => q.id === questionId);
+
+        const option = question?.options?.find((opt) => opt.value === value);
+        return option?.label || value;
+      };
+
+      // SETELAH:
       const [assessmentResult] = await connection.execute(
         `INSERT INTO assessments 
-         (company_name, company_address, industry_sector, employee_count, 
-          annual_revenue, respondent_position, contact_info, total_score, 
-          overall_level, ip_address, user_agent) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+   (company_name, company_address, industry_sector, employee_count, 
+    annual_revenue, respondent_position, contact_info, total_score, 
+    overall_level, ip_address, user_agent) 
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           responses["1.1"] || "",
           responses["1.2"] || "",
-          responses["1.3"] || "",
-          responses["1.4"] || "",
-          responses["1.5"] || "",
-          responses["1.6"] || "",
+          getOptionLabel("1.3", responses["1.3"] as string) || "", // ← LABEL
+          getOptionLabel("1.4", responses["1.4"] as string) || "", // ← LABEL
+          getOptionLabel("1.5", responses["1.5"] as string) || "", // ← LABEL
+          getOptionLabel("1.6", responses["1.6"] as string) || "", // ← LABEL
           responses["1.7"] || "",
           results.totalScore,
           results.overallLevel,
@@ -47,7 +58,7 @@ export async function POST(request: NextRequest) {
             request.headers.get("x-real-ip") ||
             "unknown",
           request.headers.get("user-agent") || "unknown",
-        ]
+        ],
       );
 
       const insertId = (assessmentResult as any).insertId;
@@ -60,7 +71,7 @@ export async function POST(request: NextRequest) {
 
         await connection.execute(
           "INSERT INTO responses (assessment_id, question_id, response_value) VALUES (?, ?, ?)",
-          [insertId, questionId, responseValue]
+          [insertId, questionId, responseValue],
         );
       }
 
@@ -77,7 +88,7 @@ export async function POST(request: NextRequest) {
             detail.score,
             detail.level,
             detail.weight,
-          ]
+          ],
         );
       }
 
@@ -90,7 +101,7 @@ export async function POST(request: NextRequest) {
           `Assessment submitted from IP: ${
             request.headers.get("x-forwarded-for") || "unknown"
           }`,
-        ]
+        ],
       );
 
       return insertId;
@@ -109,7 +120,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to process assessment",
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -130,18 +141,24 @@ export async function GET(request: NextRequest) {
        FROM assessments 
        ORDER BY completed_at DESC 
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [totalResult] = await pool.query(
-      "SELECT COUNT(*) as count FROM assessments"
+      "SELECT COUNT(*) as count FROM assessments",
     );
     const total = (totalResult as any)[0].count;
+
+    // Convert total_score to number for proper handling in frontend
+    const assessmentsWithNumbers = (assessments as any[]).map((assessment) => ({
+      ...assessment,
+      total_score: parseFloat(assessment.total_score),
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
-        assessments,
+        assessments: assessmentsWithNumbers,
         total,
         limit,
         offset,
@@ -156,7 +173,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to fetch assessments",
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
