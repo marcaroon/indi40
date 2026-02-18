@@ -492,9 +492,9 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="hero">
-        <p className="hero-label">
+        {/* <p className="hero-label">
           Kementerian Perindustrian Republik Indonesia
-        </p>
+        </p> */}
         <h1 className="hero-title">
           Seberapa siap industri Anda menuju <em>era baru</em>?
         </h1>
@@ -789,8 +789,7 @@ export default function LandingPage() {
             INDI <span>4.0</span>
           </div>
           <div className="footer-text">
-            © 2026 Badan Penelitian dan Pengembangan Industri · Kementerian
-            Perindustrian Republik Indonesia
+            © 2026 INDI 4.0 Assessment. All rights reserved.
           </div>
         </div>
       </footer>

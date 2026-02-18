@@ -607,7 +607,7 @@ export default function AssessmentForm({ onSubmit }: AssessmentFormProps) {
           INDI <span>4.0</span>
         </div>
         <p className="af-footer-text">
-          © 2026 Kementerian Perindustrian Republik Indonesia
+          © 2026 INDI 4.0 Assessment. All rights reserved.
         </p>
       </footer>
     </div>
